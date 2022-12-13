@@ -1,6 +1,11 @@
-use axum::{routing::get, Router};
-use std::env;
-use std::net::SocketAddr;
+use axum::{
+    http::StatusCode,
+    response::IntoResponse,
+    routing::{get, post},
+    Json, Router,
+};
+use serde::{Deserialize, Serialize};
+use std::{env, net::SocketAddr};
 
 #[tokio::main]
 async fn main() {
@@ -8,7 +13,8 @@ async fn main() {
     env::set_var("RUST_LOG", log_level);
     tracing_subscriber::fmt::init();
 
-    let app = Router::new().route("/", get(root));
+    let app = create_app();
+
     let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
 
     tracing::debug!("listening on {}", addr);
@@ -22,3 +28,30 @@ async fn main() {
 async fn root() -> &'static str {
     "Hello, World!"
 }
+
+fn create_app() -> Router {
+    Router::new()
+        .route("/", get(root))
+        .route("/users", post(create_user))
+}
+
+async fn create_user(Json(payload): Json<CreateUser>) -> impl IntoResponse {
+    tracing::debug!("received request with payload: {:?}", payload);
+    let user = User {
+        id: 1337,
+        username: payload.username,
+    };
+    (StatusCode::CREATED, Json(user))
+}
+
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
+struct CreateUser {
+    username: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
+struct User {
+    id: u64,
+    username: String,
+}
+
