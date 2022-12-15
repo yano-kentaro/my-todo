@@ -3,116 +3,34 @@
 // ===========================================================|0
 //                        ライブラリのインポート
 // ==================================================|2022/12/15
-use anyhow::Context;
+mod repositories;
+mod handlers;
+
+use crate::repositories::{TodoRepository, TodoRepositoryForMemory};
+use handlers::{create_todo};
+
 use axum::{
     extract::Extension,
-    http::StatusCode,
-    response::IntoResponse,
     routing::{get, post},
-    Json, Router,
+    Router,
 };
-use serde::{Deserialize, Serialize};
 use std::{
-    collections::HashMap,
     env,
     net::SocketAddr,
-    sync::{Arc, RwLock},
+    sync::Arc,
 };
-use thiserror::Error;
-
-// ===========================================================|0
-//                        リポジトリエラーの定義
-// ==================================================|2022/12/15
-#[derive(Debug, Error)]
-enum RepositoryError {
-    #[error("NotFound, id is {0}")]
-    UserNotFound(i32),
-}
-
-pub trait TodoRepository: Clone + std::marker::Send + std::marker::Sync + 'static {
-    fn create(&self, payload: CreateTodo) -> Todo;
-    fn find(&self, id: i32) -> Option<Todo>;
-    fn all(&self) -> Vec<Todo>;
-    fn update(&self, id: i32, payload: UpdateTodo) -> anyhow::Result<Todo>;
-    fn delete(&self, id: i32) -> anyhow::Result<()>;
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-pub struct Todo {
-    id: i32,
-    text: String,
-    completed: bool,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-pub struct CreateTodo {
-    text: String,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-pub struct UpdateTodo {
-    text: Option<String>,
-    completed: Option<bool>,
-}
-
-impl Todo {
-    pub fn new(id: i32, text: String) -> Self {
-        Self {
-            id,
-            text,
-            completed: false,
-        }
-    }
-}
-
-type TodoDatas = HashMap<i32, Todo>;
-
-#[derive(Debug, Clone)]
-pub struct TodoRepositoryForMemory {
-    store: Arc<RwLock<TodoDatas>>,
-}
-
-impl TodoRepositoryForMemory {
-    pub fn new() -> Self {
-        TodoRepositoryForMemory {
-            store: Arc::default(),
-        }
-    }
-}
-
-impl TodoRepository for TodoRepositoryForMemory {
-    fn create(&self, payload: CreateTodo) -> Todo {
-        todo!();
-    }
-
-    fn find(&self, id: i32) -> Option<Todo> {
-        todo!();
-    }
-
-    fn all(&self) -> Vec<Todo> {
-        todo!();
-    }
-
-    fn update(&self, id: i32, payload: UpdateTodo) -> anyhow::Result<Todo> {
-        todo!();
-    }
-
-    fn delete(&self, id: i32) -> anyhow::Result<()> {
-        todo!();
-    }
-}
 
 #[tokio::main]
 async fn main() {
+    // Logging
     let log_level = env::var("RUST_LOG").unwrap_or("info".to_string());
     env::set_var("RUST_LOG", log_level);
     tracing_subscriber::fmt::init();
 
+    // Server
     let repository = TodoRepositoryForMemory::new();
     let app = create_app(repository);
-
     let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
-
     tracing::debug!("listening on {}", addr);
 
     axum::Server::bind(&addr)
@@ -130,14 +48,6 @@ fn create_app<T: TodoRepository>(repository: T) -> Router {
         .route("/", get(root))
         .route("/todos", post(create_todo::<T>))
         .layer(Extension(Arc::new(repository)))
-}
-
-pub async fn create_todo<T: TodoRepository>(
-    Json(payload): Json<CreateTodo>,
-    Extension(repository): Extension<Arc<T>>,
-) -> impl IntoResponse {
-    let todo = repository.create(payload);
-    (StatusCode::CREATED, Json(todo))
 }
 
 // // テストの定義
