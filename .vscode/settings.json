@@ -8,5 +8,11 @@
         "titleBar.activeForeground": "#FFFFFF",
         "activityBar.background": "#A72145",
         "activityBar.foreground": "#FFFFFF"
-    }
+    },
+    "cSpell.words": [
+        "Datas",
+        "oneshot",
+        "thiserror",
+        "todos"
+    ]
 }

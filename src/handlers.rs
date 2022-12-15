@@ -1,3 +1,4 @@
+use crate::repositories::{CreateTodo, TodoRepository, UpdateTodo};
 use axum::{
     async_trait,
     extract::{Extension, FromRequest, Path, RequestParts},
@@ -8,8 +9,6 @@ use axum::{
 use serde::de::DeserializeOwned;
 use std::sync::Arc;
 use validator::Validate;
-
-use crate::repositories::{CreateTodo, TodoRepository, UpdateTodo};
 
 pub async fn create_todo<T: TodoRepository>(
     ValidatedJson(payload): ValidatedJson<CreateTodo>,

@@ -1,6 +1,8 @@
+/// Declaration Modules ( 2022/12/15 : 0 ) [ Kentaro Yano ]
 mod handlers;
 mod repositories;
 
+/// Import Modules ( 2022/12/15 : 0 ) [ Kentaro Yano ]
 use crate::repositories::{TodoRepository, TodoRepositoryForMemory};
 use axum::{
     extract::Extension,
@@ -8,9 +10,9 @@ use axum::{
     Router,
 };
 use handlers::{all_todo, create_todo, delete_todo, find_todo, update_todo};
-use std::net::SocketAddr;
-use std::{env, sync::Arc};
+use std::{env, net::SocketAddr, sync::Arc};
 
+/// EntryPoint ( 2022/12/15 : 0 ) [ Kentaro Yano ]
 #[tokio::main]
 async fn main() {
     // logging
@@ -28,9 +30,9 @@ async fn main() {
         .unwrap();
 }
 
+/// Routing ( 2022/12/15 : 0 ) [ Kentaro Yano ]
 fn create_app<T: TodoRepository>(repository: T) -> Router {
     Router::new()
-        .route("/", get(root))
         .route("/todos", post(create_todo::<T>).get(all_todo::<T>))
         .route(
             "/todos/:id",
@@ -39,10 +41,6 @@ fn create_app<T: TodoRepository>(repository: T) -> Router {
                 .patch(update_todo::<T>),
         )
         .layer(Extension(Arc::new(repository)))
-}
-
-async fn root() -> &'static str {
-    "Hello, World!"
 }
 
 #[cfg(test)]
@@ -133,9 +131,9 @@ mod test {
             "/todos/1",
             Method::PATCH,
             r#"{
-    "text": "should_update_todo",
-    "completed": false
-}"#
+                "text": "should_update_todo",
+                "completed": false
+            }"#
             .to_string(),
         );
         let res = create_app(repository).oneshot(req).await.unwrap();
