@@ -1,15 +1,15 @@
-/// Declaration Modules ( 2022/12/15 : 0 ) [ Kentaro Yano ]
+// Declaration Modules ( 2022/12/15 : 0 ) [ Kentaro Yano ]
 mod handlers;
 mod repositories;
 
-/// Import Modules ( 2022/12/15 : 0 ) [ Kentaro Yano ]
+// Import Modules ( 2022/12/15 : 0 ) [ Kentaro Yano ]
 use crate::repositories::{TodoRepository, TodoRepositoryForMemory};
 use axum::{
     extract::Extension,
     routing::{get, post},
     Router,
 };
-use handlers::{list_todos, create_todo, delete_todo, find_todo, update_todo};
+use handlers::{create_todo, delete_todo, find_todo, list_todos, update_todo};
 use std::{env, net::SocketAddr, sync::Arc};
 
 /// EntryPoint ( 2022/12/15 : 0 ) [ Kentaro Yano ]
@@ -31,13 +31,9 @@ async fn main() {
 }
 
 /// Routing ( 2022/12/15 : 0 ) [ Kentaro Yano ]
-fn create_app<T: TodoRepository>(repository: T) -> Router {
+pub(crate) fn create_app<T: TodoRepository>(repository: T) -> Router {
     Router::new()
-        .route(
-            "/todos",
-            post(create_todo::<T>)
-                .get(list_todos::<T>)
-        )
+        .route("/todos", post(create_todo::<T>).get(list_todos::<T>))
         .route(
             "/todos/:id",
             get(find_todo::<T>)
@@ -47,6 +43,7 @@ fn create_app<T: TodoRepository>(repository: T) -> Router {
         .layer(Extension(Arc::new(repository)))
 }
 
+/// Tests ( 2022/12/15 : 0 ) [ Kentaro Yano ]
 #[cfg(test)]
 mod test {
     use super::*;
