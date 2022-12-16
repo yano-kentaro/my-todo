@@ -1,3 +1,4 @@
+/// Import Modules ( 2022/12/15 : 0 ) [ Kentaro Yano ]
 use anyhow::Context;
 use serde::{Deserialize, Serialize};
 use std::{
@@ -7,12 +8,14 @@ use std::{
 use thiserror::Error;
 use validator::Validate;
 
+/// Define Error ( 2022/12/15 : 0 ) [ Kentaro Yano ]
 #[derive(Debug, Error)]
 enum RepositoryError {
     #[error("NotFound, id is {0}")]
     NotFound(i32),
 }
 
+/// Define Repository ( 2022/12/15 : 0 ) [ Kentaro Yano ]
 pub trait TodoRepository: Clone + std::marker::Send + std::marker::Sync + 'static {
     fn create(&self, payload: CreateTodo) -> Todo;
     fn find(&self, id: i32) -> Option<Todo>;
@@ -21,6 +24,7 @@ pub trait TodoRepository: Clone + std::marker::Send + std::marker::Sync + 'stati
     fn delete(&self, id: i32) -> anyhow::Result<()>;
 }
 
+/// Define Todo ( 2022/12/15 : 0 ) [ Kentaro Yano ]
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 pub struct Todo {
     pub id: i32,
@@ -28,6 +32,7 @@ pub struct Todo {
     pub completed: bool,
 }
 
+/// Define CreateTodo ( 2022/12/15 : 0 ) [ Kentaro Yano ]
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq, Validate)]
 pub struct CreateTodo {
     #[validate(length(min = 1, message = "Can not be empty"))]
@@ -42,6 +47,7 @@ impl CreateTodo {
     }
 }
 
+/// Define UpdateTodo ( 2022/12/15 : 0 ) [ Kentaro Yano ]
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq, Validate)]
 pub struct UpdateTodo {
     #[validate(length(min = 1, message = "Can not be empty"))]

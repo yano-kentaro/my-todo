@@ -9,7 +9,7 @@ use axum::{
     routing::{get, post},
     Router,
 };
-use handlers::{all_todo, create_todo, delete_todo, find_todo, update_todo};
+use handlers::{list_todos, create_todo, delete_todo, find_todo, update_todo};
 use std::{env, net::SocketAddr, sync::Arc};
 
 /// EntryPoint ( 2022/12/15 : 0 ) [ Kentaro Yano ]
@@ -33,7 +33,11 @@ async fn main() {
 /// Routing ( 2022/12/15 : 0 ) [ Kentaro Yano ]
 fn create_app<T: TodoRepository>(repository: T) -> Router {
     Router::new()
-        .route("/todos", post(create_todo::<T>).get(all_todo::<T>))
+        .route(
+            "/todos",
+            post(create_todo::<T>)
+                .get(list_todos::<T>)
+        )
         .route(
             "/todos/:id",
             get(find_todo::<T>)
@@ -107,11 +111,11 @@ mod test {
     }
 
     #[tokio::test]
-    async fn should_get_all_todos() {
-        let expected = Todo::new(1, "should_get_all_todos".to_string());
+    async fn should_get_list_todoss() {
+        let expected = Todo::new(1, "should_get_list_todoss".to_string());
 
         let repository = TodoRepositoryForMemory::new();
-        repository.create(CreateTodo::new("should_get_all_todos".to_string()));
+        repository.create(CreateTodo::new("should_get_list_todoss".to_string()));
         let req = build_todo_req_with_empty(Method::GET, "/todos");
         let res = create_app(repository).oneshot(req).await.unwrap();
         let bytes = hyper::body::to_bytes(res.into_body()).await.unwrap();

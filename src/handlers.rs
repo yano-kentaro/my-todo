@@ -1,3 +1,4 @@
+/// Import Modules ( 2022/12/15 : 0 ) [ Kentaro Yano ]
 use crate::repositories::{CreateTodo, TodoRepository, UpdateTodo};
 use axum::{
     async_trait,
@@ -10,6 +11,7 @@ use serde::de::DeserializeOwned;
 use std::sync::Arc;
 use validator::Validate;
 
+/// Create Todo ( 2022/12/15 : 0 ) [ Kentaro Yano ]
 pub async fn create_todo<T: TodoRepository>(
     ValidatedJson(payload): ValidatedJson<CreateTodo>,
     Extension(repository): Extension<Arc<T>>,
@@ -19,6 +21,7 @@ pub async fn create_todo<T: TodoRepository>(
     (StatusCode::CREATED, Json(todo))
 }
 
+/// Find Todo ( 2022/12/15 : 0 ) [ Kentaro Yano ]
 pub async fn find_todo<T: TodoRepository>(
     Path(id): Path<i32>,
     Extension(repository): Extension<Arc<T>>,
@@ -27,13 +30,15 @@ pub async fn find_todo<T: TodoRepository>(
     Ok((StatusCode::OK, Json(todo)))
 }
 
-pub async fn all_todo<T: TodoRepository>(
+/// List Todos ( 2022/12/15 : 0 ) [ Kentaro Yano ]
+pub async fn list_todos<T: TodoRepository>(
     Extension(repository): Extension<Arc<T>>,
 ) -> impl IntoResponse {
     let todo = repository.all();
     (StatusCode::OK, Json(todo))
 }
 
+/// Update Todo ( 2022/12/15 : 0 ) [ Kentaro Yano ]
 pub async fn update_todo<T: TodoRepository>(
     Path(id): Path<i32>,
     ValidatedJson(payload): ValidatedJson<UpdateTodo>,
@@ -45,6 +50,7 @@ pub async fn update_todo<T: TodoRepository>(
     Ok((StatusCode::CREATED, Json(todo)))
 }
 
+/// Delete Todo ( 2022/12/15 : 0 ) [ Kentaro Yano ]
 pub async fn delete_todo<T: TodoRepository>(
     Path(id): Path<i32>,
     Extension(repository): Extension<Arc<T>>,
