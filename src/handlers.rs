@@ -17,7 +17,6 @@ pub async fn create_todo<T: TodoRepository>(
     Extension(repository): Extension<Arc<T>>,
 ) -> impl IntoResponse {
     let todo = repository.create(payload);
-
     (StatusCode::CREATED, Json(todo))
 }
 
@@ -75,14 +74,18 @@ where
     type Rejection = (StatusCode, String);
 
     async fn from_request(req: &mut RequestParts<B>) -> Result<Self, Self::Rejection> {
+        // Parse JSON
         let Json(value) = Json::<T>::from_request(req).await.map_err(|rejection| {
             let message = format!("Json parse error: [{}]", rejection);
             (StatusCode::BAD_REQUEST, message)
         })?;
+
+        // Validate
         value.validate().map_err(|rejection| {
             let message = format!("Validation error: [{}]", rejection).replace('\n', ", ");
             (StatusCode::BAD_REQUEST, message)
         })?;
+
         Ok(ValidatedJson(value))
     }
 }
